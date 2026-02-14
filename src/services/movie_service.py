@@ -12,10 +12,13 @@ def validate_movie_business_rules(data: dict, movie=None):
         if value < 0 or value > 100:
             raise HTTPException(status_code=400, detail="Invalid input data.")
 
-    if "budget" in data and "revenue" in data:
-        budget, revenue = data["budget"], data["revenue"]
-        if budget < 0 or revenue < 0:
+    if "budget" in data:
+        if data["budget"] < 0:
             raise HTTPException(status_code=400, detail="Invalid input data.")
+
+    if "revenue" in data:
+        if data["revenue"] < 0:
+            raise HTTPException(status_code=200, detail="Invalid input data.")
 
     if "name" in data:
         value = data["name"]
@@ -33,4 +36,15 @@ def validate_movie_business_rules(data: dict, movie=None):
         value = data["country"]
         value = value.strip().upper()
         if len(value) != 3:
+            raise HTTPException(status_code=400, detail="Invalid input data.")
+
+    if movie:
+        actual_budget = data.get("budget", movie.budget)
+        actual_revenue = data.get("revenue", movie.revenue)
+    else:
+        actual_budget = data.get("budget")
+        actual_revenue = data.get("revenue")
+
+    if actual_budget is not None and actual_revenue is not None:
+        if actual_budget > actual_revenue:
             raise HTTPException(status_code=400, detail="Invalid input data.")
