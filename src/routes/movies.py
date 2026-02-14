@@ -61,7 +61,6 @@ async def get_movies(
 async def create_movie(
     payload: schemas.MovieCreateRequest, db: AsyncSession = Depends(get_db)
 ):
-    validate_movie_business_rules(payload.model_dump(), movie=None)
 
     dup_result = await db.execute(
         select(MovieModel).where(
@@ -73,6 +72,8 @@ async def create_movie(
             status_code=409,
             detail=f"Movie with name '{payload.name}' and release date '{payload.date}' already exists.",
         )
+
+    validate_movie_business_rules(payload.model_dump(), movie=None)
 
     country_result = await db.execute(
         select(CountryModel).where(CountryModel.code == payload.country)
@@ -192,4 +193,4 @@ async def update_movie(
     await db.commit()
     await db.refresh(movie)
 
-    return Response(status_code=200, content="Movie updated successfully.")
+    return {"detail": "Movie updated successfully."}
